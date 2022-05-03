@@ -4,7 +4,18 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/drawable/background.xml" value="0.2985" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2985" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/drawable/info_background.xml" value="0.2985" />
         <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/activity_main.xml" value="0.3009833262077811" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/fragment_edit_city.xml" value="0.3009833262077811" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/fragment_forecast.xml" value="0.3009833262077811" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/fragment_info.xml" value="0.3009833262077811" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/fragment_map.xml" value="0.3009833262077811" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/fragment_menu.xml" value="0.3009833262077811" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/fragment_settings.xml" value="0.3009833262077811" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/fragment_weather.xml" value="0.3009833262077811" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/info.xml" value="0.3009833262077811" />
+        <entry key="..\:/Users/Admin/Documents/GitHub/MyProject/MyWeather/app/src/main/res/layout/menu_item.xml" value="0.3009833262077811" />
       </map>
     </option>
   </component>
