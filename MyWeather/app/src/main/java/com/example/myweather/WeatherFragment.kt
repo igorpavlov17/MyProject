@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -16,13 +15,11 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
 
-class WeatherFragment : Fragment() {
-    var city = "Рыбинск"
-    private val api = "34dc93bfdf3425debd0c37b6580d8fe0"
+class WeatherFragment(private val city: String, private val api: String) : Fragment() {
+    private lateinit var tempUnit: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -31,11 +28,8 @@ class WeatherFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        tempUnit  = requireActivity().findViewById<TextView>(R.id.hidden_temp).text.toString()
         WeatherAsync().execute()
-
-        view.findViewById<ImageView>(R.id.edit_city).setOnClickListener {
-            parentFragmentManager.beginTransaction().add(R.id.main_container, EditCityFragment()).addToBackStack(null).commit()
-        }
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -44,44 +38,72 @@ class WeatherFragment : Fragment() {
             super.onPreExecute()
             view?.findViewById<ProgressBar>(R.id.loader)?.visibility = View.VISIBLE
             view?.findViewById<ConstraintLayout>(R.id.weather_container)?.visibility = View.GONE
+            requireActivity().findViewById<TextView>(R.id.error_text).visibility = View.GONE
+            requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.GONE
         }
 
-        override fun doInBackground(vararg p0: String?): String {
-            return URL("https://api.openweathermap.org/data/2.5/weather?q=$city&units=metric&lang=ru&appid=$api").readText(Charsets.UTF_8)
+        override fun doInBackground(vararg p0: String?): String? {
+            val response:String? = try{
+                URL("https://api.openweathermap.org/data/2.5/weather?q=$city&units=$tempUnit&lang=ru&appid=$api").readText(Charsets.UTF_8)
+            }catch (e: Exception){
+                ""
+            }
+            return response
         }
 
         @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String) {
             super.onPostExecute(result)
-            val jsonObject = JSONObject(result)
-            var pressure = jsonObject.getJSONObject("main").getString("pressure").toInt()
-            pressure = (pressure/1.3332).toInt()
-            val humidity = jsonObject.getJSONObject("main").getString("humidity")
-            val sunrise:Long = jsonObject.getJSONObject("sys").getLong("sunrise")
-            val sunset:Long = jsonObject.getJSONObject("sys").getLong("sunset")
-            val windSpeed = jsonObject.getJSONObject("wind").getString("speed")
-            val weather = jsonObject.getJSONArray("weather").getJSONObject(0)
-            val lastUpdate = "Последнее обновление: " + SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH).format(Date(jsonObject.getLong("dt") * 1000))
-            val temp = jsonObject.getJSONObject("main").getInt("temp").toString() + "°"
-            val status = weather.getString("description")
-            val address = jsonObject.getString("name") + ", " + jsonObject.getJSONObject("sys").getString("country")
+            try {
+                val jsonObject = JSONObject(result)
+                var pressure = jsonObject.getJSONObject("main").getString("pressure").toInt()
+                var wind = jsonObject.getJSONObject("wind").getString("speed").toDouble()
+                val humidity = jsonObject.getJSONObject("main").getString("humidity")
+                val sunrise = jsonObject.getJSONObject("sys").getLong("sunrise")
+                val sunset = jsonObject.getJSONObject("sys").getLong("sunset")
+                val lastUpdate = "Последнее обновление: " + SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH).format(Date(jsonObject.getLong("dt") * 1000))
+                val temp = jsonObject.getJSONObject("main").getInt("temp").toString() + "°"
+                val status = jsonObject.getJSONArray("weather").getJSONObject(0).getString("description")
+                val address = jsonObject.getString("name") + ", " + jsonObject.getJSONObject("sys").getString("country")
 
-            view?.findViewById<TextView>(R.id.time)?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(
-                Date()
-            )
-            view?.findViewById<TextView>(R.id.address)?.text = address
-            view?.findViewById<TextView>(R.id.lastupdate)?.text = lastUpdate
-            view?.findViewById<TextView>(R.id.status)?.text = status.capitalize()
-            view?.findViewById<TextView>(R.id.temp)?.text = temp
+                requireActivity().findViewById<TextView>(R.id.time)?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date())
+                requireActivity().findViewById<TextView>(R.id.address)?.text = address
 
-            view?.findViewById<TextView>(R.id.sunrise)?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date(sunrise*1000))
-            view?.findViewById<TextView>(R.id.sunset)?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date(sunset*1000))
-            view?.findViewById<TextView>(R.id.wind)?.text = "$windSpeed м/c"
-            view?.findViewById<TextView>(R.id.pressure)?.text = "$pressure мм рт.ст."
-            view?.findViewById<TextView>(R.id.humidity)?.text = "$humidity %"
+                view?.findViewById<TextView>(R.id.lastupdate)?.text = lastUpdate
+                view?.findViewById<TextView>(R.id.status)?.text = status.capitalize()
+                view?.findViewById<TextView>(R.id.temp)?.text = temp
+                view?.findViewById<TextView>(R.id.sunrise_text)?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date(sunrise*1000))
+                view?.findViewById<TextView>(R.id.sunset_text)?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date(sunset*1000))
 
-            view?.findViewById<ProgressBar>(R.id.loader)?.visibility = View.GONE
-            view?.findViewById<ConstraintLayout>(R.id.weather_container)?.visibility = View.VISIBLE
+                when (requireActivity().findViewById<TextView>(R.id.hidden_wind).text) {
+                    "ms" -> {
+                        if (tempUnit == "imperial") wind /= 2.237
+                        view?.findViewById<TextView>(R.id.wind_text)?.text = "%.1f".format(wind) + " м/с"
+                    }
+                    "kmh" -> {
+                        if (tempUnit == "imperial") wind /= 2.237
+                        wind *= 3.6
+                        view?.findViewById<TextView>(R.id.wind_text)?.text = "%.1f".format(wind) + " км/ч"
+                    }
+                    "milh" -> {
+                        if (tempUnit == "metric") wind *= 2.237
+                        view?.findViewById<TextView>(R.id.wind_text)?.text = "%.1f".format(wind) + " миль/ч"
+                    }
+                }
+
+                if (requireActivity().findViewById<TextView>(R.id.hidden_pressure).text == "mmrtst"){
+                    pressure = (pressure/1.3332).toInt()
+                    view?.findViewById<TextView>(R.id.pressure_text)?.text = "$pressure мм рт.ст."
+                } else view?.findViewById<TextView>(R.id.pressure_text)?.text = "$pressure мбар"
+
+                view?.findViewById<TextView>(R.id.humidity_text)?.text = "$humidity %"
+                view?.findViewById<ProgressBar>(R.id.loader)?.visibility = View.GONE
+                view?.findViewById<ConstraintLayout>(R.id.weather_container)?.visibility = View.VISIBLE
+                requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.VISIBLE
+            } catch (e: Exception){
+                view?.findViewById<ProgressBar>(R.id.loader)?.visibility = View.GONE
+                requireActivity().findViewById<TextView>(R.id.error_text).visibility = View.VISIBLE
+            }
         }
     }
 }

@@ -5,9 +5,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 
-class MenuFragment : Fragment() {
+class MenuFragment(private val api: String) : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -19,13 +21,13 @@ class MenuFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<ConstraintLayout>(R.id.weather).setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.main_container, WeatherFragment()).addToBackStack(null).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.main_container, WeatherFragment(requireActivity().findViewById<TextView>(R.id.address).text.toString(), api)).addToBackStack(null).commit()
         }
         view.findViewById<ConstraintLayout>(R.id.forecast).setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.main_container, ForecastFragment()).addToBackStack(null).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.main_container, ForecastFragment(api)).addToBackStack(null).commit()
         }
         view.findViewById<ConstraintLayout>(R.id.map).setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment()).addToBackStack(null).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.main_container, MenuMapFragment(api)).addToBackStack(null).commit()
         }
         view.findViewById<ConstraintLayout>(R.id.settings).setOnClickListener {
             parentFragmentManager.beginTransaction().replace(R.id.main_container, SettingsFragment()).addToBackStack(null).commit()
