@@ -1,7 +1,6 @@
 package com.example.myweather
 
 import android.annotation.SuppressLint
-import android.os.AsyncTask
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -10,6 +9,11 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -26,33 +30,33 @@ class ForecastFragment(private val api: String) : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ForecastAsync().execute()
+        getForecast()
     }
 
-    @SuppressLint("StaticFieldLeak")
-    inner class ForecastAsync() : AsyncTask<String, Void, String>() {
-        override fun onPreExecute() {
-            super.onPreExecute()
+    private fun <R> CoroutineScope.execute(
+        onPreExecute: () -> Unit,
+        doInBackground: () -> R,
+        onPostExecute: (R) -> Unit
+    ) = launch {
+        onPreExecute()
+        val result = withContext(Dispatchers.IO){
+            doInBackground()
+        }
+        onPostExecute(result)
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun getForecast(){
+        lifecycleScope.execute(onPreExecute = {
             view?.findViewById<ProgressBar>(R.id.forecast_loader)?.visibility = View.VISIBLE
             view?.findViewById<ConstraintLayout>(R.id.forecast_container)?.visibility = View.GONE
             requireActivity().findViewById<TextView>(R.id.error_text).visibility = View.GONE
             requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.GONE
-        }
-
-        override fun doInBackground(vararg p0: String?): String? {
-            val response:String? = try{
-                URL("https://api.openweathermap.org/data/2.5/onecall?lat=58.04&lon=38.84&exclude=hourly,minutely,current&units=metric&lang=ru&appid=34dc93bfdf3425debd0c37b6580d8fe0").readText(Charsets.UTF_8)
-            }catch (e: Exception){
-                ""
-            }
-            return response
-        }
-
-        @SuppressLint("SetTextI18n")
-        override fun onPostExecute(result: String) {
-            super.onPostExecute(result)
+        }, doInBackground = {
+            URL("https://api.openweathermap.org/data/2.5/onecall?lat=58.04&lon=38.84&exclude=hourly,minutely,current,alerts&units=metric&lang=ru&appid=34dc93bfdf3425debd0c37b6580d8fe0").readText(Charsets.UTF_8)
+        }, onPostExecute = {
             try {
-                val jsonObject = JSONObject(result)
+                val jsonObject = JSONObject(it)
 
                 val dates = arrayOf(R.id.date1, R.id.date2, R.id.date3, R.id.date4, R.id.date5, R.id.date6, R.id.date7)
                 for (i in 1..7){
@@ -79,6 +83,6 @@ class ForecastFragment(private val api: String) : Fragment() {
                 view?.findViewById<ProgressBar>(R.id.forecast_loader)?.visibility = View.GONE
                 requireActivity().findViewById<TextView>(R.id.error_text).visibility = View.VISIBLE
             }
-        }
+        })
     }
 }
