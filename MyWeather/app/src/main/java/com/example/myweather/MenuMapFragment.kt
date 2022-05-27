@@ -10,7 +10,7 @@ import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.Glide
 
-class MenuMapFragment(private val api: String) : Fragment() {
+class MenuMapFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -23,19 +23,19 @@ class MenuMapFragment(private val api: String) : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<ConstraintLayout>(R.id.temp_map).setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment("temp_new", api)).addToBackStack(null).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment.newInstance("temp_new")).addToBackStack(null).commit()
         }
         view.findViewById<ConstraintLayout>(R.id.precipitation_map).setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment("precipitation_new", api)).addToBackStack(null).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment.newInstance("precipitation_new")).addToBackStack(null).commit()
         }
         view.findViewById<ConstraintLayout>(R.id.clouds_map).setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment("clouds_new", api)).addToBackStack(null).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment.newInstance("clouds_new")).addToBackStack(null).commit()
         }
         view.findViewById<ConstraintLayout>(R.id.pressure_map).setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment("pressure_new", api)).addToBackStack(null).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment.newInstance("pressure_new")).addToBackStack(null).commit()
         }
         view.findViewById<ConstraintLayout>(R.id.wind_map).setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment("wind_new", api)).addToBackStack(null).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.main_container, MapFragment.newInstance("wind_new")).addToBackStack(null).commit()
         }
     }
 }
