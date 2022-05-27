@@ -62,7 +62,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Рыбинск"
             android:textSize="24dp"
             app:layout_constraintEnd_toStartOf="@+id/show_info"
             app:layout_constraintStart_toEndOf="@+id/show_menu"
@@ -81,31 +80,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/hidden_temp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="metric"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/hidden_wind"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ms"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/hidden_temp" />
-
-    <TextView
-        android:id="@+id/hidden_pressure"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="mmrtst"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/hidden_wind" />
 </androidx.constraintlayout.widget.ConstraintLayout>
 
