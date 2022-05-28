@@ -28,10 +28,8 @@ class MainActivity : AppCompatActivity() {
             findViewById<ConstraintLayout>(R.id.address_container).visibility = View.GONE
             supportFragmentManager.beginTransaction().replace(R.id.main_container, EditCityFragment()).commit()
         }
-        else {
-            if (savedInstanceState == null) supportFragmentManager.beginTransaction().replace(R.id.main_container, WeatherFragment()).commit()
-            //if (savedInstanceState == null) supportFragmentManager.beginTransaction().add(R.id.main_container, ForecastFragment()).commit()
-        }
+        else if (savedInstanceState == null) supportFragmentManager.beginTransaction().replace(R.id.main_container, WeatherFragment()).commit()
+
 
         findViewById<TextView>(R.id.time)?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date())
 

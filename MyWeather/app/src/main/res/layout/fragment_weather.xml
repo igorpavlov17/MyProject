@@ -263,14 +263,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Created By"
+                android:text="MyWeather"
                 android:textSize="12dp" />
 
             <TextView
                 android:id="@+id/about_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Igor Pavlov"
+                android:text="2022"
                 android:textSize="14dp" />
         </LinearLayout>
 

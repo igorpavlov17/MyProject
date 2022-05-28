@@ -53,8 +53,8 @@ class ForecastFragment : Fragment() {
         onPostExecute(result)
     }
 
-    @SuppressLint("SetTextI18n")
-    fun getForecast(){
+
+    private fun getForecast(){
         lifecycleScope.execute(onPreExecute = {
             view?.findViewById<ProgressBar>(R.id.forecast_loader)?.visibility = View.VISIBLE
             view?.findViewById<ConstraintLayout>(R.id.forecast_container)?.visibility = View.GONE
@@ -68,62 +68,48 @@ class ForecastFragment : Fragment() {
             } catch (e: Exception){
                 ""
             }
-
         }, onPostExecute = {
             try {
                 val jsonObject = JSONObject(it)
-
-                val dates = arrayOf(R.id.date1, R.id.date2, R.id.date3, R.id.date4, R.id.date5, R.id.date6, R.id.date7)
-                val dayTemps = arrayOf(R.id.temp_day1, R.id.temp_day2, R.id.temp_day3, R.id.temp_day4, R.id.temp_day5, R.id.temp_day6, R.id.temp_day7)
-                val nightTemps = arrayOf(R.id.temp_night1, R.id.temp_night2, R.id.temp_night3, R.id.temp_night4, R.id.temp_night5, R.id.temp_night6, R.id.temp_night7)
-
                 for (i in 1..7){
                     val date = SimpleDateFormat("dd.MM", Locale.ENGLISH).format(jsonObject.getJSONArray("daily").getJSONObject(i).getLong("dt") * 1000)
                     val dayTemp = jsonObject.getJSONArray("daily").getJSONObject(i).getJSONObject("temp").getInt("day").toString() + "°"
                     val nightTemp = jsonObject.getJSONArray("daily").getJSONObject(i).getJSONObject("temp").getInt("night").toString() + "°"
-
                     myDbManager.insertToDb(date, dayTemp, nightTemp)
                     myDbManager.insertToDb("lastLoadedDate$i", date, "")
-
-                    view?.findViewById<TextView>(dates[i-1])?.text = myDbManager.getTitleByContent(dayTemp)
-                    view?.findViewById<TextView>(dayTemps[i-1])?.text = myDbManager.getContentByTitle(date)
-                    view?.findViewById<TextView>(nightTemps[i-1])?.text = myDbManager.getContent2ByTitle(date)
                 }
+
                 val lastForecastUpdate = "Последнее обновление: " + SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH).format(jsonObject.getJSONObject("current").getLong("dt") * 1000)
                 myDbManager.insertToDb("lastForecastUpdate", lastForecastUpdate, "")
-                view?.findViewById<TextView>(R.id.last_forecast_update)?.text = myDbManager.getContentByTitle("lastForecastUpdate")
 
-                view?.findViewById<TextView>(R.id.last_forecast_update)?.visibility = View.VISIBLE
-                view?.findViewById<ImageView>(R.id.update_forecast)?.visibility = View.VISIBLE
+                loadFromDb()
                 view?.findViewById<ProgressBar>(R.id.forecast_loader)?.visibility = View.GONE
-                view?.findViewById<ConstraintLayout>(R.id.forecast_container)?.visibility = View.VISIBLE
-                requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.VISIBLE
             } catch (e: Exception){
                 view?.findViewById<ProgressBar>(R.id.forecast_loader)?.visibility = View.GONE
-                if (myDbManager.getContentByTitle("lastForecastUpdate") == ""){
-                    requireActivity().findViewById<TextView>(R.id.error_text).visibility = View.VISIBLE
-                }
+                if (myDbManager.getContentByTitle("lastForecastUpdate") == "") requireActivity().findViewById<TextView>(R.id.error_text).visibility = View.VISIBLE
                 else{
-                    val dates = arrayOf(R.id.date1, R.id.date2, R.id.date3, R.id.date4, R.id.date5, R.id.date6, R.id.date7)
-                    val dayTemps = arrayOf(R.id.temp_day1, R.id.temp_day2, R.id.temp_day3, R.id.temp_day4, R.id.temp_day5, R.id.temp_day6, R.id.temp_day7)
-                    val nightTemps = arrayOf(R.id.temp_night1, R.id.temp_night2, R.id.temp_night3, R.id.temp_night4, R.id.temp_night5, R.id.temp_night6, R.id.temp_night7)
-
-                    for (i in 1..7){
-
-                        view?.findViewById<TextView>(dates[i-1])?.text = myDbManager.getContentByTitle("lastLoadedDate$i")
-                        view?.findViewById<TextView>(dayTemps[i-1])?.text = myDbManager.getContentByTitle(myDbManager.getContentByTitle("lastLoadedDate$i"))
-                        view?.findViewById<TextView>(nightTemps[i-1])?.text = myDbManager.getContent2ByTitle(myDbManager.getContentByTitle("lastLoadedDate$i"))
-
-                    }
-                    view?.findViewById<TextView>(R.id.last_forecast_update)?.text = myDbManager.getContentByTitle("lastForecastUpdate")
-
-                    view?.findViewById<TextView>(R.id.last_forecast_update)?.visibility = View.VISIBLE
-                    view?.findViewById<ImageView>(R.id.update_forecast)?.visibility = View.VISIBLE
-                    view?.findViewById<ConstraintLayout>(R.id.forecast_container)?.visibility = View.VISIBLE
-                    requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.VISIBLE
+                    loadFromDb()
                     Toast.makeText(activity, "Невозможно загрузить данные!", Toast.LENGTH_SHORT).show()
                 }
             }
         })
+    }
+
+    private fun loadFromDb(){
+        val dates = arrayOf(R.id.date1, R.id.date2, R.id.date3, R.id.date4, R.id.date5, R.id.date6, R.id.date7)
+        val dayTemps = arrayOf(R.id.temp_day1, R.id.temp_day2, R.id.temp_day3, R.id.temp_day4, R.id.temp_day5, R.id.temp_day6, R.id.temp_day7)
+        val nightTemps = arrayOf(R.id.temp_night1, R.id.temp_night2, R.id.temp_night3, R.id.temp_night4, R.id.temp_night5, R.id.temp_night6, R.id.temp_night7)
+
+        for (i in 1..7){
+            view?.findViewById<TextView>(dates[i-1])?.text = myDbManager.getContentByTitle("lastLoadedDate$i")
+            view?.findViewById<TextView>(dayTemps[i-1])?.text = myDbManager.getContentByTitle(myDbManager.getContentByTitle("lastLoadedDate$i"))
+            view?.findViewById<TextView>(nightTemps[i-1])?.text = myDbManager.getContent2ByTitle(myDbManager.getContentByTitle("lastLoadedDate$i"))
+        }
+        view?.findViewById<TextView>(R.id.last_forecast_update)?.text = myDbManager.getContentByTitle("lastForecastUpdate")
+
+        view?.findViewById<TextView>(R.id.last_forecast_update)?.visibility = View.VISIBLE
+        view?.findViewById<ImageView>(R.id.update_forecast)?.visibility = View.VISIBLE
+        view?.findViewById<ConstraintLayout>(R.id.forecast_container)?.visibility = View.VISIBLE
+        requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.VISIBLE
     }
 }

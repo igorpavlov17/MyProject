@@ -25,7 +25,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
             android:layout_marginBottom="20dp"
-            android:text="MyWeather\n\nПриложение отображает текущую погоду в выбранном городе, а также прогноз погоды на 7 дней\nЕсть опция просмотра погоды карт с различными условиями, настройка отображаемых единиц измерения\n\nMade by Igor Pavlov, 2022"
+            android:text="MyWeather\n\nПриложение отображает текущую погоду в выбранном городе, а также прогноз погоды на 7 дней.\nЕсть опция просмотра карт с различными условиями, настройка отображаемых единиц измерения.\n\n2022"
             android:textAlignment="center"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
