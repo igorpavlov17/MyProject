@@ -15,9 +15,29 @@ import com.example.myweather.db.MyDbManager
 
 class SettingsFragment : Fragment() {
     lateinit var myDbManager: MyDbManager
+    var isTempOpened = false
+    var isWindOpened = false
+    var isPressureOpened = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState != null){
+            isTempOpened = savedInstanceState.getBoolean("isTempOpened")
+            isWindOpened = savedInstanceState.getBoolean("isWindOpened")
+            isPressureOpened = savedInstanceState.getBoolean("isPressureOpened")
+
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_settings, container, false)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("isTempOpened", isTempOpened)
+        outState.putBoolean("isWindOpened", isWindOpened)
+        outState.putBoolean("isPressureOpened", isPressureOpened)
     }
 
     @SuppressLint("SetTextI18n")
@@ -26,20 +46,42 @@ class SettingsFragment : Fragment() {
         myDbManager = MyDbManager(requireContext())
         myDbManager.openDB()
 
+        if (isTempOpened) view.findViewById<ConstraintLayout>(R.id.temp_unit_setting).visibility = View.VISIBLE
+        if (isWindOpened) view.findViewById<ConstraintLayout>(R.id.wind_unit_setting).visibility = View.VISIBLE
+        if (isPressureOpened) view.findViewById<ConstraintLayout>(R.id.pressure_unit_setting).visibility = View.VISIBLE
+
         view.findViewById<ConstraintLayout>(R.id.temp_unit).setOnClickListener {
-            if (view.findViewById<ConstraintLayout>(R.id.temp_unit_setting).visibility == View.GONE)
+            if (view.findViewById<ConstraintLayout>(R.id.temp_unit_setting).visibility == View.GONE){
                 view.findViewById<ConstraintLayout>(R.id.temp_unit_setting).visibility = View.VISIBLE
-            else view.findViewById<ConstraintLayout>(R.id.temp_unit_setting).visibility = View.GONE
+                isTempOpened = true
+            }
+
+            else{
+                view.findViewById<ConstraintLayout>(R.id.temp_unit_setting).visibility = View.GONE
+                isTempOpened = false
+            }
         }
         view.findViewById<ConstraintLayout>(R.id.wind_unit).setOnClickListener {
-            if (view.findViewById<ConstraintLayout>(R.id.wind_unit_setting).visibility == View.GONE)
+            if (view.findViewById<ConstraintLayout>(R.id.wind_unit_setting).visibility == View.GONE){
                 view.findViewById<ConstraintLayout>(R.id.wind_unit_setting).visibility = View.VISIBLE
-            else view.findViewById<ConstraintLayout>(R.id.wind_unit_setting).visibility = View.GONE
+                isWindOpened = true
+            }
+
+            else {
+                view.findViewById<ConstraintLayout>(R.id.wind_unit_setting).visibility = View.GONE
+                isWindOpened = false
+            }
         }
         view.findViewById<ConstraintLayout>(R.id.pressure_unit).setOnClickListener {
-            if (view.findViewById<ConstraintLayout>(R.id.pressure_unit_setting).visibility == View.GONE)
+            if (view.findViewById<ConstraintLayout>(R.id.pressure_unit_setting).visibility == View.GONE){
                 view.findViewById<ConstraintLayout>(R.id.pressure_unit_setting).visibility = View.VISIBLE
-            else view.findViewById<ConstraintLayout>(R.id.pressure_unit_setting).visibility = View.GONE
+                isPressureOpened = true
+            }
+
+            else {
+                view.findViewById<ConstraintLayout>(R.id.pressure_unit_setting).visibility = View.GONE
+                isPressureOpened = false
+            }
         }
 
         view.findViewById<Button>(R.id.apply).setOnClickListener {
