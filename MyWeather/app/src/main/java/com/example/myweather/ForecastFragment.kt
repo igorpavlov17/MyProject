@@ -24,11 +24,11 @@ import java.util.*
 class ForecastFragment : Fragment() {
     private val api = "34dc93bfdf3425debd0c37b6580d8fe0"
     lateinit var myDbManager: MyDbManager
-    var isOpened = false
+    //var isOpened = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState != null) isOpened = savedInstanceState.getBoolean("isForecastOpened")
+        //if (savedInstanceState != null) isOpened = savedInstanceState.getBoolean("isForecastOpened")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -37,7 +37,7 @@ class ForecastFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean("isForecastOpened", isOpened)
+        //outState.putBoolean("isForecastOpened", isOpened)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -46,7 +46,7 @@ class ForecastFragment : Fragment() {
         myDbManager.openDB()
         getForecast()
         view.findViewById<ImageView>(R.id.update_forecast).setOnClickListener{
-            isOpened = false
+            //isOpened = false
             getForecast()
         }
     }
@@ -80,13 +80,13 @@ class ForecastFragment : Fragment() {
             addressContainer.visibility = View.GONE
         }, doInBackground = {
             try {
-                if (isOpened) "-"
-                else URL("https://api.openweathermap.org/data/2.5/onecall?lat=58.04&lon=38.84&exclude=hourly,minutely,alerts&units=metric&lang=ru&appid=$api").readText(Charsets.UTF_8)
+                //if (isOpened) "-"
+                URL("https://api.openweathermap.org/data/2.5/onecall?lat=58.04&lon=38.84&exclude=hourly,minutely,alerts&units=metric&lang=ru&appid=$api").readText(Charsets.UTF_8)
             } catch (e: Exception){
                 ""
             }
         }, onPostExecute = {
-            isOpened = true
+            //isOpened = true
             try {
                 val jsonObject = JSONObject(it)
                 for (i in 1..7){
