@@ -10,10 +10,6 @@ import com.bumptech.glide.Glide
 class MapFragment : Fragment() {
     private val api = "34dc93bfdf3425debd0c37b6580d8fe0"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_map, container, false)
     }

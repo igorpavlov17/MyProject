@@ -29,7 +29,6 @@ class WeatherFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_weather, container, false)
     }
 
-    @SuppressLint("FragmentLiveDataObserve")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         myDbManager = MyDbManager(requireContext())
@@ -55,11 +54,16 @@ class WeatherFragment : Fragment() {
     }
 
     private fun getWeather(){
+        val loader = view?.findViewById<ProgressBar>(R.id.loader)
+        val weatherContainer = view?.findViewById<ProgressBar>(R.id.weather_container)
+        val errorText = requireActivity().findViewById<TextView>(R.id.error_text)
+        val addressContainer = requireActivity().findViewById<ConstraintLayout>(R.id.address_container)
+
         lifecycleScope.execute(onPreExecute = {
-            view?.findViewById<ProgressBar>(R.id.loader)?.visibility = View.VISIBLE
-            view?.findViewById<ConstraintLayout>(R.id.weather_container)?.visibility = View.GONE
-            requireActivity().findViewById<TextView>(R.id.error_text).visibility = View.GONE
-            requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.GONE
+            loader?.visibility = View.VISIBLE
+            weatherContainer?.visibility = View.GONE
+            errorText.visibility = View.GONE
+            addressContainer.visibility = View.GONE
         }, doInBackground = {
             try {
                 URL("https://api.openweathermap.org/data/2.5/weather?q=$city&units=$tempUnit&lang=ru&appid=$api").readText(Charsets.UTF_8)
@@ -90,34 +94,42 @@ class WeatherFragment : Fragment() {
                 myDbManager.insertToDb("lastUpdate", lastUpdate, "")
 
                 loadFromDb()
-
-                view?.findViewById<ProgressBar>(R.id.loader)?.visibility = View.GONE
-                view?.findViewById<ConstraintLayout>(R.id.weather_container)?.visibility = View.VISIBLE
-                requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.VISIBLE
+                loader?.visibility = View.GONE
+                weatherContainer?.visibility = View.VISIBLE
+                addressContainer.visibility = View.VISIBLE
             } catch (e: Exception){
-                view?.findViewById<ProgressBar>(R.id.loader)?.visibility = View.GONE
                 if (myDbManager.getContentByTitle("address") == ""){
-                    requireActivity().findViewById<TextView>(R.id.error_text).visibility = View.VISIBLE
+                    errorText.visibility = View.VISIBLE
                 }
                 else {
                     loadFromDb()
-
-                    view?.findViewById<ConstraintLayout>(R.id.weather_container)?.visibility = View.VISIBLE
-                    requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.VISIBLE
+                    weatherContainer?.visibility = View.VISIBLE
+                    addressContainer.visibility = View.VISIBLE
                     Toast.makeText(activity, "Невозможно загрузить данные!", Toast.LENGTH_SHORT).show()
                 }
+                loader?.visibility = View.GONE
             }
         })
     }
 
     @SuppressLint("SetTextI18n")
     private fun loadFromDb(){
-        requireActivity().findViewById<TextView>(R.id.address)?.text = myDbManager.getContentByTitle("address")
-        view?.findViewById<TextView>(R.id.lastupdate)?.text = myDbManager.getContentByTitle("lastUpdate")
-        view?.findViewById<TextView>(R.id.status)?.text = myDbManager.getContentByTitle("status")
-        view?.findViewById<TextView>(R.id.temp)?.text = myDbManager.getContentByTitle("temp")
-        view?.findViewById<TextView>(R.id.sunrise_text)?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date(myDbManager.getContentByTitle("sunrise").toLong()*1000))
-        view?.findViewById<TextView>(R.id.sunset_text)?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date(myDbManager.getContentByTitle("sunset").toLong()*1000))
+        val address = requireActivity().findViewById<TextView>(R.id.address)
+        val lastUpdate = view?.findViewById<TextView>(R.id.lastupdate)
+        val status = view?.findViewById<TextView>(R.id.status)
+        val temp = view?.findViewById<TextView>(R.id.temp)
+        val sunriseText = view?.findViewById<TextView>(R.id.sunrise_text)
+        val sunsetText = view?.findViewById<TextView>(R.id.sunset_text)
+        val windText = view?.findViewById<TextView>(R.id.wind_text)
+        val pressureText = view?.findViewById<TextView>(R.id.pressure_text)
+        val humidityText = view?.findViewById<TextView>(R.id.humidity_text)
+
+        address.text = myDbManager.getContentByTitle("address")
+        lastUpdate?.text = myDbManager.getContentByTitle("lastUpdate")
+        status?.text = myDbManager.getContentByTitle("status")
+        temp?.text = myDbManager.getContentByTitle("temp")
+        sunriseText?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date(myDbManager.getContentByTitle("sunrise").toLong()*1000))
+        sunsetText?.text = SimpleDateFormat("HH:mm", Locale.ENGLISH).format(Date(myDbManager.getContentByTitle("sunset").toLong()*1000))
 
         var wind = myDbManager.getContentByTitle("wind").toDouble()
         when (myDbManager.getContentByTitle("wind_unit")) {
@@ -125,25 +137,25 @@ class WeatherFragment : Fragment() {
                 if (tempUnit == "imperial"){
                     wind /= 2.237
                 }
-                view?.findViewById<TextView>(R.id.wind_text)?.text = "%.1f".format(wind) + " м/с"
+                windText?.text = "%.1f".format(wind) + " м/с"
             }
             "kmh" -> {
                 if (tempUnit == "imperial") wind /= 2.237
                 wind *= 3.6
-                view?.findViewById<TextView>(R.id.wind_text)?.text = "%.1f".format(wind) + " км/ч"
+                windText?.text = "%.1f".format(wind) + " км/ч"
             }
             "milh" -> {
                 if (tempUnit == "metric") wind *= 2.237
-                view?.findViewById<TextView>(R.id.wind_text)?.text = "%.1f".format(wind) + " миль/ч"
+                windText?.text = "%.1f".format(wind) + " миль/ч"
             }
         }
 
         var pressure = myDbManager.getContentByTitle("pressure").toInt()
         if (myDbManager.getContentByTitle("pressure_unit") == "mmrtst"){
             pressure = (pressure/1.3332).toInt()
-            view?.findViewById<TextView>(R.id.pressure_text)?.text = "$pressure мм рт.ст."
-        } else view?.findViewById<TextView>(R.id.pressure_text)?.text = myDbManager.getContentByTitle("pressure") + " мбар"
+            pressureText?.text = "$pressure мм рт.ст."
+        } else pressureText?.text = myDbManager.getContentByTitle("pressure") + " мбар"
 
-        view?.findViewById<TextView>(R.id.humidity_text)?.text = myDbManager.getContentByTitle("humidity") + " %"
+        humidityText?.text = myDbManager.getContentByTitle("humidity") + " %"
     }
 }

@@ -34,6 +34,8 @@
             android:ems="10"
             android:hint="Введите город"
             android:inputType="textPersonName"
+            android:textColor="#CACACA"
+            android:textColorHint="#B3B3B3"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
