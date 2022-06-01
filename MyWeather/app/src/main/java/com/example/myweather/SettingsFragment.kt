@@ -24,7 +24,6 @@ class SettingsFragment : Fragment() {
             isTempOpened = savedInstanceState.getBoolean("isTempOpened")
             isWindOpened = savedInstanceState.getBoolean("isWindOpened")
             isPressureOpened = savedInstanceState.getBoolean("isPressureOpened")
-
         }
     }
 

@@ -24,9 +24,20 @@ class WeatherFragment : Fragment() {
     private val api = "34dc93bfdf3425debd0c37b6580d8fe0"
     private lateinit var tempUnit: String
     lateinit var myDbManager: MyDbManager
+    var isForecastOpened = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState != null) isForecastOpened = savedInstanceState.getBoolean("isOpened")
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_weather, container, false)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("isOpened", isForecastOpened)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -37,6 +48,7 @@ class WeatherFragment : Fragment() {
         city = requireActivity().findViewById<TextView>(R.id.address).text.toString()
         getWeather()
         view.findViewById<ImageView>(R.id.update).setOnClickListener {
+            isForecastOpened = false
             getWeather()
         }
     }
@@ -55,7 +67,7 @@ class WeatherFragment : Fragment() {
 
     private fun getWeather(){
         val loader = view?.findViewById<ProgressBar>(R.id.loader)
-        val weatherContainer = view?.findViewById<ProgressBar>(R.id.weather_container)
+        val weatherContainer = view?.findViewById<ConstraintLayout>(R.id.weather_container)
         val errorText = requireActivity().findViewById<TextView>(R.id.error_text)
         val addressContainer = requireActivity().findViewById<ConstraintLayout>(R.id.address_container)
 
@@ -66,11 +78,13 @@ class WeatherFragment : Fragment() {
             addressContainer.visibility = View.GONE
         }, doInBackground = {
             try {
-                URL("https://api.openweathermap.org/data/2.5/weather?q=$city&units=$tempUnit&lang=ru&appid=$api").readText(Charsets.UTF_8)
+                if (isForecastOpened) "-"
+                else URL("https://api.openweathermap.org/data/2.5/weather?q=$city&units=$tempUnit&lang=ru&appid=$api").readText(Charsets.UTF_8)
             } catch (e: Exception){
                 ""
             }
         }, onPostExecute = {
+            isForecastOpened = true
             try {
                 val jsonObject = JSONObject(it)
 
@@ -80,9 +94,9 @@ class WeatherFragment : Fragment() {
                 myDbManager.insertToDb("temp", temp, "")
                 val status = jsonObject.getJSONArray("weather").getJSONObject(0).getString("description").capitalize()
                 myDbManager.insertToDb("status", status, "")
-                var pressure = jsonObject.getJSONObject("main").getString("pressure").toInt()
+                val pressure = jsonObject.getJSONObject("main").getString("pressure").toInt()
                 myDbManager.insertToDb("pressure", pressure.toString(), "")
-                var wind = jsonObject.getJSONObject("wind").getString("speed").toDouble()
+                val wind = jsonObject.getJSONObject("wind").getString("speed").toDouble()
                 myDbManager.insertToDb("wind", wind.toString(), "")
                 val humidity = jsonObject.getJSONObject("main").getString("humidity")
                 myDbManager.insertToDb("humidity", humidity.toString(), "")
@@ -98,6 +112,7 @@ class WeatherFragment : Fragment() {
                 weatherContainer?.visibility = View.VISIBLE
                 addressContainer.visibility = View.VISIBLE
             } catch (e: Exception){
+                loader?.visibility = View.GONE
                 if (myDbManager.getContentByTitle("address") == ""){
                     errorText.visibility = View.VISIBLE
                 }
@@ -105,9 +120,8 @@ class WeatherFragment : Fragment() {
                     loadFromDb()
                     weatherContainer?.visibility = View.VISIBLE
                     addressContainer.visibility = View.VISIBLE
-                    Toast.makeText(activity, "Невозможно загрузить данные!", Toast.LENGTH_SHORT).show()
+                    if (it == "") Toast.makeText(activity, "Невозможно загрузить данные!", Toast.LENGTH_SHORT).show()
                 }
-                loader?.visibility = View.GONE
             }
         })
     }

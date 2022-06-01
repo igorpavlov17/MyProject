@@ -1,6 +1,5 @@
 package com.example.myweather
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -25,18 +24,29 @@ import java.util.*
 class ForecastFragment : Fragment() {
     private val api = "34dc93bfdf3425debd0c37b6580d8fe0"
     lateinit var myDbManager: MyDbManager
+    var isOpened = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState != null) isOpened = savedInstanceState.getBoolean("isForecastOpened")
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_forecast, container, false)
     }
 
-    @SuppressLint("FragmentLiveDataObserve")
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("isForecastOpened", isOpened)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         myDbManager = MyDbManager(requireContext())
         myDbManager.openDB()
         getForecast()
         view.findViewById<ImageView>(R.id.update_forecast).setOnClickListener{
+            isOpened = false
             getForecast()
         }
     }
@@ -53,18 +63,15 @@ class ForecastFragment : Fragment() {
         onPostExecute(result)
     }
 
-
     private fun getForecast(){
         val forecastLoader = view?.findViewById<ProgressBar>(R.id.forecast_loader)
-        val forecastContainer = view?.findViewById<ProgressBar>(R.id.forecast_container)
+        val forecastContainer = view?.findViewById<ConstraintLayout>(R.id.forecast_container)
         val lastForecastUpdateText = view?.findViewById<TextView>(R.id.last_forecast_update)
         val updateForecast = view?.findViewById<ImageView>(R.id.update_forecast)
         val errorText = requireActivity().findViewById<TextView>(R.id.error_text)
         val addressContainer = requireActivity().findViewById<ConstraintLayout>(R.id.address_container)
 
         lifecycleScope.execute(onPreExecute = {
-
-
             forecastLoader?.visibility = View.VISIBLE
             forecastContainer?.visibility = View.GONE
             lastForecastUpdateText?.visibility = View.GONE
@@ -73,11 +80,13 @@ class ForecastFragment : Fragment() {
             addressContainer.visibility = View.GONE
         }, doInBackground = {
             try {
-                URL("https://api.openweathermap.org/data/2.5/onecall?lat=58.04&lon=38.84&exclude=hourly,minutely,alerts&units=metric&lang=ru&appid=$api").readText(Charsets.UTF_8)
+                if (isOpened) "-"
+                else URL("https://api.openweathermap.org/data/2.5/onecall?lat=58.04&lon=38.84&exclude=hourly,minutely,alerts&units=metric&lang=ru&appid=$api").readText(Charsets.UTF_8)
             } catch (e: Exception){
                 ""
             }
         }, onPostExecute = {
+            isOpened = true
             try {
                 val jsonObject = JSONObject(it)
                 for (i in 1..7){
@@ -98,7 +107,7 @@ class ForecastFragment : Fragment() {
                 if (myDbManager.getContentByTitle("lastForecastUpdate") == "") errorText.visibility = View.VISIBLE
                 else{
                     loadFromDb()
-                    Toast.makeText(activity, "Невозможно загрузить данные!", Toast.LENGTH_SHORT).show()
+                    if (it == "") Toast.makeText(activity, "Невозможно загрузить данные!", Toast.LENGTH_SHORT).show()
                 }
             }
         })
