@@ -18,8 +18,8 @@ class EditCityFragment : Fragment() {
         view.findViewById<Button>(R.id.change_city).setOnClickListener {
             if (view.findViewById<EditText>(R.id.edit_city_text).text.toString() != ""){
                 requireActivity().findViewById<TextView>(R.id.address).text = view.findViewById<EditText>(R.id.edit_city_text).text.toString().capitalize()
-                if (savedInstanceState == null) parentFragmentManager.beginTransaction().replace(R.id.main_container, WeatherFragment()).commit()
-                //requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.VISIBLE
+                parentFragmentManager.beginTransaction().replace(R.id.main_container, WeatherFragment()).commit()
+                requireActivity().findViewById<ConstraintLayout>(R.id.address_container).visibility = View.GONE
             } else Toast.makeText(activity, "Введите город!", Toast.LENGTH_SHORT).show()
         }
     }
